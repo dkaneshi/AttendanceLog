@@ -62,16 +62,19 @@
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
         ],
         "lint": "pint",
-        "test:unit": "pest --parallel --coverage --recreate-databases",
+        "refactor": "rector",
+        "test:unit": "pest --parallel --coverage --min=70",
         "test:lint": "pint --test",
         "test:types": [
             "phpstan --memory-limit=512M"
         ],
+        "test:refactor": "rector --dry-run",
         "test": [
             "@php artisan config:clear --ansi",
             "@test:unit",
             "@test:lint",
-            "@test:types"
+            "@test:types",
+            "@test:refactor"
         ]
     },
     "extra": {
