@@ -25,8 +25,27 @@ final class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $firstName = fake()->firstName();
+        $lastName = fake()->lastName();
+        $middleName = fake()->boolean(30) ? fake()->firstName() : null;
+        $suffix = fake()->boolean(10) ? fake()->randomElement(['Jr.', 'Sr.', 'II', 'III', 'IV', 'PhD', 'MD']) : null;
+
+        // Construct the full name
+        $name = $firstName;
+        if ($middleName) {
+            $name .= ' '.$middleName;
+        }
+        $name .= ' '.$lastName;
+        if ($suffix) {
+            $name .= ' '.$suffix;
+        }
+
         return [
-            'name' => fake()->name(),
+            'name' => $name,
+            'first_name' => $firstName,
+            'middle_name' => $middleName,
+            'last_name' => $lastName,
+            'suffix' => $suffix,
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => self::$password ??= Hash::make('password'),

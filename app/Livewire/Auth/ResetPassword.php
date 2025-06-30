@@ -33,7 +33,7 @@ final class ResetPassword extends Component
     {
         $this->token = $token;
 
-        $this->email = request()->string('email');
+        $this->email = (string) request()->string('email');
     }
 
     /**

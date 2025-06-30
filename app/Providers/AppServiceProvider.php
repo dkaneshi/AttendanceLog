@@ -70,4 +70,5 @@ final class AppServiceProvider extends ServiceProvider
     private function configureDates(): void
     {
         Date::use(CarbonImmutable::class);
-    }}
+    }
+}
