@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->string('first_name')->nullable()->after('name');
             $table->string('middle_name')->nullable()->after('first_name');
             $table->string('last_name')->nullable()->after('middle_name');
@@ -22,8 +22,8 @@ return new class extends Migration
         });
 
         // Migrate existing data
-        DB::table('users')->get()->each(function ($user) {
-            $nameParts = explode(' ', $user->name);
+        DB::table('users')->get()->each(function ($user): void {
+            $nameParts = explode(' ', (string) $user->name);
             $firstName = $nameParts[0] ?? null;
             $lastName = count($nameParts) > 1 ? end($nameParts) : null;
 
@@ -50,7 +50,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropColumn(['first_name', 'middle_name', 'last_name', 'suffix']);
         });
     }
