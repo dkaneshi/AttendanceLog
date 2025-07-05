@@ -1,134 +1,184 @@
-# 🚀 AI Dev Tasks for Cursor 🤖
+# AttendanceLog
 
-Welcome to **AI Dev Tasks**! This repository provides a collection of `.mdc` (Markdown Command) files designed to supercharge your feature development workflow within the [Cursor](https://cursor.sh/) editor. By leveraging these commands with Cursor's AI Agent, you can systematically approach building features, from ideation to implementation, with built-in checkpoints for verification.
+AttendanceLog is a web-based application designed to track employee daily attendance including shift times, lunch breaks, and overtime calculations. The system provides accurate time tracking with automated overtime calculation based on standard 8-hour work days.
 
-Stop wrestling with monolithic AI requests and start guiding your AI collaborator step-by-step!
+## Features
 
-## ✨ The Core Idea
+- **Time Logging**: Track shift start/end times and lunch break periods
+- **Absence Management**: Log vacation and sick hours with balance tracking
+- **Overtime Calculation**: Automatic calculation of overtime hours
+- **Weekly Approval Workflow**: Manager review and approval of timesheets
+- **Reporting & Analytics**: Generate attendance reports and export data
+- **Role-Based Access**: Different permissions for employees, managers, and administrators
 
-Building complex features with AI can sometimes feel like a black box. This workflow aims to bring structure, clarity, and control to the process by:
+## Technology Stack
 
-1. **Defining Scope:** Clearly outlining what needs to be built with a Product Requirement Document (PRD).
-2. **Detailed Planning:** Breaking down the PRD into a granular, actionable task list.
-3. **Iterative Implementation:** Guiding the AI to tackle one task at a time, allowing you to review and approve each change.
+- **Backend Framework**: PHP 8.2+ with Laravel 12
+- **Frontend Framework**: Livewire 3.0
+- **JavaScript**: Alpine.js
+- **CSS Framework**: Tailwind CSS
+- **UI Components**: Flux UI component library
+- **Testing**: Pest PHP
 
-This structured approach helps ensure the AI stays on track, makes it easier to debug issues, and gives you confidence in the generated code.
+## Build/Configuration Instructions
 
-## Workflow: From Idea to Implemented Feature 💡➡️💻
+### Prerequisites
+- PHP 8.2 or higher
+- Composer
+- Node.js and npm
 
-Here's the step-by-step process using the `.mdc` files in this repository:
+### Setup Steps
 
-### 1️⃣ Create a Product Requirement Document (PRD)
+1. **Clone the repository**
 
-First, lay out the blueprint for your feature. A PRD clarifies what you're building, for whom, and why.
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
 
-You can create a lightweight PRD directly within Cursor:
+3. **Set up environment file**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-1. Ensure you have the `create-prd.mdc` file from this repository accessible.
-2. In Cursor's Agent chat, initiate PRD creation:
+4. **Set up the database**
+   The project is configured to use SQLite by default for development:
+   ```bash
+   touch database/database.sqlite
+   php artisan migrate
+   ```
 
-    ```text
-    Use @create-prd.mdc
-    Here's the feature I want to build: [Describe your feature in detail]
-    Reference these files to help you: [Optional: @file1.py @file2.ts]
-    ```
-    *(Pro Tip: For complex PRDs, using MAX mode in Cursor is highly recommended if your budget allows for more comprehensive generation.)*
+5. **Install JavaScript dependencies**
+   ```bash
+   npm install
+   ```
 
-    ![Example of initiating PRD creation](https://pbs.twimg.com/media/Go6DDlyX0AAS7JE?format=jpg&name=large)
+6. **Start the development server**
+   ```bash
+   composer dev
+   ```
+   This command runs multiple services concurrently:
+   - Laravel development server
+   - Queue worker
+   - Laravel Pail (log viewer)
+   - Vite development server
 
-### 2️⃣ Generate Your Task List from the PRD
+## Testing Information
 
-With your PRD drafted (e.g., `MyFeature-PRD.md`), the next step is to generate a detailed, step-by-step implementation plan for your AI Developer.
+### Testing Framework
+The project uses Pest PHP, a testing framework built on top of PHPUnit with a more expressive syntax.
 
-1. Ensure you have `generate-tasks.mdc` accessible.
-2. In Cursor's Agent chat, use the PRD to create tasks:
+### Running Tests
 
-    ```text
-    Now take @MyFeature-PRD.md and create tasks using @generate-tasks.mdc
-    ```
-    *(Note: Replace `@MyFeature-PRD.md` with the actual filename of the PRD you generated in step 1.)*
+- **Run all tests**
+  ```bash
+  composer test
+  ```
 
-    ![Example of generating tasks from PRD](https://pbs.twimg.com/media/Go6FITbWkAA-RCT?format=jpg&name=medium)
+- **Run only unit tests**
+  ```bash
+  composer test:unit
+  ```
 
-### 3️⃣ Examine Your Task List
+- **Run code style checks**
+  ```bash
+  composer test:lint
+  ```
 
-You'll now have a well-structured task list, often with tasks and sub-tasks, ready for the AI to start working on. This provides a clear roadmap for implementation.
+- **Run static analysis**
+  ```bash
+  composer test:types
+  ```
 
-![Example of a generated task list](https://pbs.twimg.com/media/Go6GNuOWsAEcSDm?format=jpg&name=medium)
+### Adding New Tests
 
-### 4️⃣ Instruct the AI to Work Through Tasks (and Mark Completion)
+#### Unit Tests
+Unit tests should be placed in the `tests/Unit` directory. Here's an example of a simple unit test:
 
-To ensure methodical progress and allow for verification, we'll use `process-task-list.mdc`. This command instructs the AI to focus on one task at a time and wait for your go-ahead before moving to the next.
+```php
+<?php
 
-1. Create or ensure you have the `process-task-list.mdc` file accessible.
-2. In Cursor's Agent chat, tell the AI to start with the first task (e.g., `1.1`):
+declare(strict_types=1);
 
-    ```text
-    Please start on task 1.1 and use @process-task-list.mdc
-    ```
-    *(Important: You only need to reference `@process-task-list.mdc` for the *first* task. The instructions within it guide the AI for subsequent tasks.)*
+test('string can be reversed', function () {
+    $original = 'Hello World';
+    $reversed = strrev($original);
 
-    The AI will attempt the task and then prompt you to review.
+    expect($reversed)->toBe('dlroW olleH');
+});
+```
 
-    ![Example of starting on a task with process-task-list.mdc](https://pbs.twimg.com/media/Go6I41KWcAAAlHc?format=jpg&name=medium)
+#### Feature Tests
+Feature tests should be placed in the `tests/Feature` directory. These tests typically test the application's HTTP endpoints and Livewire components. Here's an example of a simple feature test:
 
-### 5️⃣ Review, Approve, and Progress ✅
+```php
+<?php
 
-As the AI completes each task, you review the changes.
+declare(strict_types=1);
 
-* If the changes are good, simply reply with "yes" (or a similar affirmative) to instruct the AI to mark the task complete and move to the next one.
-* If changes are needed, provide feedback to the AI to correct the current task before moving on.
+test('returns a successful response', function () {
+    $response = $this->get('/');
 
-You'll see a satisfying list of completed items grow, providing a clear visual of your feature coming to life!
+    $response->assertStatus(200);
+});
+```
 
-![Example of a progressing task list with completed items](https://pbs.twimg.com/media/Go6KrXZWkAA_UuX?format=jpg&name=medium)
+#### Testing Livewire Components
+For testing Livewire components, use the Pest Livewire plugin:
 
-While it's not always perfect, this method has proven to be a very reliable way to build out larger features with AI assistance.
+```php
+<?php
 
-### Video Demonstration 🎥
+declare(strict_types=1);
 
-If you'd like to see this in action, I demonstrated it on [Claire Vo's "How I AI" podcast](https://www.youtube.com/watch?v=fD4ktSkNCw4).
+use App\Livewire\Counter;
 
-![Demonstration of AI Dev Tasks on How I AI Podcast](https://img.youtube.com/vi/fD4ktSkNCw4/maxresdefault.jpg)
+test('can increment counter', function () {
+    Livewire::test(Counter::class)
+        ->assertSee(0)
+        ->call('increment')
+        ->assertSee(1);
+});
+```
 
-## 🗂️ Files in this Repository
+## Additional Development Information
 
-* **`create-prd.mdc`**: Guides the AI in generating a Product Requirement Document for your feature.
-* **`generate-tasks.mdc`**: Takes a PRD markdown file as input and helps the AI break it down into a detailed, step-by-step implementation task list.
-* **`process-task-list.mdc`**: Instructs the AI on how to process the generated task list, tackling one task at a time and waiting for your approval before proceeding. (This file also contains logic for the AI to mark tasks as complete).
+### Code Style
+The project uses Laravel Pint for code style enforcement. To check and fix code style issues:
 
-## 🌟 Benefits
+```bash
+# Check code style
+composer test:lint
 
-* **Structured Development:** Enforces a clear process from idea to code.
-* **Step-by-Step Verification:** Allows you to review and approve AI-generated code at each small step, ensuring quality and control.
-* **Manages Complexity:** Breaks down large features into smaller, digestible tasks for the AI, reducing the chance of it getting lost or generating overly complex, incorrect code.
-* **Improved Reliability:** Offers a more dependable approach to leveraging AI for significant development work compared to single, large prompts.
-* **Clear Progress Tracking:** Provides a visual representation of completed tasks, making it easy to see how much has been done and what's next.
+# Fix code style issues
+composer lint
+```
 
-## 🛠️ How to Use
+### Static Analysis
+The project uses PHPStan via Larastan for static analysis. To run static analysis:
 
-1. **Clone or Download:** Get these `.mdc` files into your project or a central location where Cursor can access them.
-2. **Follow the Workflow:** Systematically use the `.mdc` files in Cursor's Agent chat as described in the 5-step workflow above.
-3. **Adapt and Iterate:**
-    * Feel free to modify the prompts within the `.mdc` files to better suit your specific needs or coding style.
-    * If the AI struggles with a task, try rephrasing your initial feature description or breaking down tasks even further.
+```bash
+composer test:types
+```
 
-## 💡 Tips for Success
+### Code Refactoring
+The project uses Rector for automated code refactoring. The configuration is in `rector.php`.
 
-* **Be Specific:** The more context and clear instructions you provide (both in your initial feature description and any clarifications), the better the AI's output will be.
-* **MAX Mode for PRDs:** As mentioned, using MAX mode in Cursor for PRD creation (`create-prd.mdc`) can yield more thorough and higher-quality results if your budget supports it.
-* **Correct File Tagging:** Always ensure you're accurately tagging the PRD filename (e.g., `@MyFeature-PRD.md`) when generating tasks.
-* **Patience and Iteration:** AI is a powerful tool, but it's not magic. Be prepared to guide, correct, and iterate. This workflow is designed to make that iteration process smoother.
+### Project Structure
+- `app/` - Application code
+- `config/` - Configuration files
+- `database/` - Database migrations, factories, and seeders
+- `resources/` - Views, assets, and language files
+- `routes/` - Route definitions
+- `tests/` - Test files
+- `vendor/` - Composer dependencies
 
-## 🤝 Contributing
+### Livewire Components
+The project uses Livewire for interactive UI components. Livewire components are located in the `app/Livewire` directory.
 
-Got ideas to improve these `.mdc` files or have new ones that fit this workflow? Contributions are welcome!
+### Flux UI
+The project uses Livewire Flux for UI components. Flux Pro is configured via a custom Composer repository.
 
-Please feel free to:
-
-* Open an issue to discuss changes or suggest new features.
-* Submit a pull request with your enhancements.
-
----
-
-Happy AI-assisted developing!
+### Data Integrity
+The project uses soft deletes for all database records and cascade on delete should not be used for foreign key relationships.
