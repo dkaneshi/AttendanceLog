@@ -35,6 +35,19 @@ final class UserAbsenceBalance extends Model
         'year' => 'integer',
     ];
 
+    public static function getOrCreateForUser(int $userId, int $year): self
+    {
+        return self::firstOrCreate([
+            'user_id' => $userId,
+            'year' => $year,
+        ], [
+            'vacation_hours_total' => 160.00, // 20 days × 8 hours
+            'vacation_hours_used' => 0.00,
+            'sick_hours_total' => 80.00, // 10 days × 8 hours
+            'sick_hours_used' => 0.00,
+        ]);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -62,39 +75,43 @@ final class UserAbsenceBalance extends Model
 
     public function useVacationHours(float $hours): bool
     {
-        if (!$this->hasVacationBalance($hours)) {
+        if (! $this->hasVacationBalance($hours)) {
             return false;
         }
 
         $this->vacation_hours_used += $hours;
+
         return $this->save();
     }
 
     public function useSickHours(float $hours): bool
     {
-        if (!$this->hasSickBalance($hours)) {
+        if (! $this->hasSickBalance($hours)) {
             return false;
         }
 
         $this->sick_hours_used += $hours;
+
         return $this->save();
     }
 
     public function refundVacationHours(float $hours): bool
     {
         $this->vacation_hours_used = max(0, $this->vacation_hours_used - $hours);
+
         return $this->save();
     }
 
     public function refundSickHours(float $hours): bool
     {
         $this->sick_hours_used = max(0, $this->sick_hours_used - $hours);
+
         return $this->save();
     }
 
     public function getVacationUsagePercentageAttribute(): float
     {
-        if ($this->vacation_hours_total == 0) {
+        if ($this->vacation_hours_total === 0) {
             return 0.0;
         }
 
@@ -103,7 +120,7 @@ final class UserAbsenceBalance extends Model
 
     public function getSickUsagePercentageAttribute(): float
     {
-        if ($this->sick_hours_total == 0) {
+        if ($this->sick_hours_total === 0) {
             return 0.0;
         }
 
@@ -127,17 +144,17 @@ final class UserAbsenceBalance extends Model
         $errors = [];
 
         // Check increment validation
-        if (!$this->validateHoursIncrement($hours)) {
+        if (! $this->validateHoursIncrement($hours)) {
             $errors[] = 'Hours must be in 0.25 hour (15-minute) increments.';
         }
 
         // Check daily maximum
-        if (!$this->validateMaxDailyHours($hours)) {
+        if (! $this->validateMaxDailyHours($hours)) {
             $errors[] = 'Cannot exceed 8 hours per day.';
         }
 
         // Check available balance
-        if ($type === 'vacation' && !$this->hasVacationBalance($hours)) {
+        if ($type === 'vacation' && ! $this->hasVacationBalance($hours)) {
             $errors[] = sprintf(
                 'Insufficient vacation balance. Available: %.2f hours, Requested: %.2f hours.',
                 $this->vacation_hours_remaining,
@@ -145,7 +162,7 @@ final class UserAbsenceBalance extends Model
             );
         }
 
-        if ($type === 'sick' && !$this->hasSickBalance($hours)) {
+        if ($type === 'sick' && ! $this->hasSickBalance($hours)) {
             $errors[] = sprintf(
                 'Insufficient sick balance. Available: %.2f hours, Requested: %.2f hours.',
                 $this->sick_hours_remaining,
@@ -154,18 +171,5 @@ final class UserAbsenceBalance extends Model
         }
 
         return $errors;
-    }
-
-    public static function getOrCreateForUser(int $userId, int $year): self
-    {
-        return self::firstOrCreate([
-            'user_id' => $userId,
-            'year' => $year,
-        ], [
-            'vacation_hours_total' => 160.00, // 20 days × 8 hours
-            'vacation_hours_used' => 0.00,
-            'sick_hours_total' => 80.00, // 10 days × 8 hours
-            'sick_hours_used' => 0.00,
-        ]);
     }
 }

@@ -35,7 +35,7 @@ return new class extends Migration
 
             // Ensure one entry per user per date
             $table->unique(['user_id', 'date']);
-            
+
             // Add indexes for performance
             $table->index(['date', 'user_id']);
             $table->index(['approval_status', 'manager_id']);

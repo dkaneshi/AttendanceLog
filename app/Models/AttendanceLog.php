@@ -67,7 +67,7 @@ final class AttendanceLog extends Model
 
     public function calculateWorkedHours(): float
     {
-        if (!$this->shift_start_time || !$this->shift_end_time) {
+        if (! $this->shift_start_time || ! $this->shift_end_time) {
             return 0.0;
         }
 
@@ -90,13 +90,14 @@ final class AttendanceLog extends Model
     {
         $workedHours = $this->calculateWorkedHours();
         $standardHours = 8.0;
-        
+
         return max(0.0, $workedHours - $standardHours);
     }
 
     public function calculateTotalHours(): float
     {
         $workedHours = $this->calculateWorkedHours();
+
         return $workedHours + $this->vacation_hours + $this->sick_hours;
     }
 
@@ -128,18 +129,19 @@ final class AttendanceLog extends Model
         }
 
         $daysDiff = Carbon::now()->diffInDays($this->date);
+
         return $daysDiff <= 7;
     }
 
     public function getLunchDurationAttribute(): ?int
     {
-        if (!$this->lunch_start_time || !$this->lunch_end_time) {
+        if (! $this->lunch_start_time || ! $this->lunch_end_time) {
             return null;
         }
 
         $lunchStart = Carbon::parse($this->lunch_start_time);
         $lunchEnd = Carbon::parse($this->lunch_end_time);
-        
+
         return $lunchEnd->diffInMinutes($lunchStart);
     }
 
@@ -148,7 +150,7 @@ final class AttendanceLog extends Model
         $overtimeHours = (float) $this->overtime_hours;
         $hours = floor($overtimeHours);
         $minutes = ($overtimeHours - $hours) * 60;
-        
+
         return sprintf('%dh %dm', $hours, $minutes);
     }
 }

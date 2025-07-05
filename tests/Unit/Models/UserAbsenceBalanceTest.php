@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 test('can calculate remaining vacation hours', function () {
-    $balance = new \App\Models\UserAbsenceBalance([
+    $balance = new App\Models\UserAbsenceBalance([
         'vacation_hours_total' => 160.0,
         'vacation_hours_used' => 40.0,
     ]);
@@ -12,7 +12,7 @@ test('can calculate remaining vacation hours', function () {
 });
 
 test('can calculate remaining sick hours', function () {
-    $balance = new \App\Models\UserAbsenceBalance([
+    $balance = new App\Models\UserAbsenceBalance([
         'sick_hours_total' => 80.0,
         'sick_hours_used' => 20.0,
     ]);
@@ -21,7 +21,7 @@ test('can calculate remaining sick hours', function () {
 });
 
 test('can check vacation balance availability', function () {
-    $balance = new \App\Models\UserAbsenceBalance([
+    $balance = new App\Models\UserAbsenceBalance([
         'vacation_hours_total' => 160.0,
         'vacation_hours_used' => 40.0,
     ]);
@@ -31,7 +31,7 @@ test('can check vacation balance availability', function () {
 });
 
 test('can check sick balance availability', function () {
-    $balance = new \App\Models\UserAbsenceBalance([
+    $balance = new App\Models\UserAbsenceBalance([
         'sick_hours_total' => 80.0,
         'sick_hours_used' => 20.0,
     ]);
@@ -41,7 +41,7 @@ test('can check sick balance availability', function () {
 });
 
 test('can validate hours increment', function () {
-    $balance = new \App\Models\UserAbsenceBalance();
+    $balance = new App\Models\UserAbsenceBalance();
 
     expect($balance->validateHoursIncrement(1.0))->toBe(true);
     expect($balance->validateHoursIncrement(1.25))->toBe(true);
@@ -52,7 +52,7 @@ test('can validate hours increment', function () {
 });
 
 test('can validate max daily hours', function () {
-    $balance = new \App\Models\UserAbsenceBalance();
+    $balance = new App\Models\UserAbsenceBalance();
 
     expect($balance->validateMaxDailyHours(8.0))->toBe(true);
     expect($balance->validateMaxDailyHours(4.5))->toBe(true);
@@ -61,7 +61,7 @@ test('can validate max daily hours', function () {
 });
 
 test('can calculate usage percentages', function () {
-    $balance = new \App\Models\UserAbsenceBalance([
+    $balance = new App\Models\UserAbsenceBalance([
         'vacation_hours_total' => 160.0,
         'vacation_hours_used' => 40.0,
         'sick_hours_total' => 80.0,
@@ -73,7 +73,7 @@ test('can calculate usage percentages', function () {
 });
 
 test('can validate time off request with errors', function () {
-    $balance = new \App\Models\UserAbsenceBalance([
+    $balance = new App\Models\UserAbsenceBalance([
         'vacation_hours_total' => 160.0,
         'vacation_hours_used' => 155.0, // Only 5 hours left
         'sick_hours_total' => 80.0,

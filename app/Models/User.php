@@ -113,19 +113,6 @@ final class User extends Authenticatable
         return $initials;
     }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
     public function attendanceLogs(): HasMany
     {
         return $this->hasMany(AttendanceLog::class);
@@ -195,5 +182,18 @@ final class User extends Authenticatable
     public function manager(): BelongsTo
     {
         return $this->belongsTo(self::class, 'manager_id');
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 }

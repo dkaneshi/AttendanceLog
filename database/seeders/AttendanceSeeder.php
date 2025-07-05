@@ -7,7 +7,6 @@ namespace Database\Seeders;
 use App\Models\AttendanceLog;
 use App\Models\User;
 use App\Models\UserAbsenceBalance;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 final class AttendanceSeeder extends Seeder
@@ -76,7 +75,7 @@ final class AttendanceSeeder extends Seeder
         foreach ($employees as $employee) {
             for ($i = 0; $i < 20; $i++) { // 20 days of attendance
                 $date = $startDate->copy()->addDays($i);
-                
+
                 // Skip weekends
                 if ($date->isWeekend()) {
                     continue;
@@ -117,7 +116,7 @@ final class AttendanceSeeder extends Seeder
         // Create some manager attendance logs
         for ($i = 0; $i < 15; $i++) {
             $date = $startDate->copy()->addDays($i);
-            
+
             if ($date->isWeekend()) {
                 continue;
             }

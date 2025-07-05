@@ -26,7 +26,7 @@ return new class extends Migration
 
             // Unique constraint to ensure one record per user per year
             $table->unique(['user_id', 'year']);
-            
+
             // Add indexes for performance
             $table->index(['user_id', 'year']);
             $table->index('year');

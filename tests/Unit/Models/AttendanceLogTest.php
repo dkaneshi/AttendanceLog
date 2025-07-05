@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 test('can check approval status correctly', function () {
-    $approved = new \App\Models\AttendanceLog(['approval_status' => 'approved']);
-    $pending = new \App\Models\AttendanceLog(['approval_status' => 'pending']);
-    $rejected = new \App\Models\AttendanceLog(['approval_status' => 'rejected']);
-    $correction = new \App\Models\AttendanceLog(['approval_status' => 'requires_correction']);
+    $approved = new App\Models\AttendanceLog(['approval_status' => 'approved']);
+    $pending = new App\Models\AttendanceLog(['approval_status' => 'pending']);
+    $rejected = new App\Models\AttendanceLog(['approval_status' => 'rejected']);
+    $correction = new App\Models\AttendanceLog(['approval_status' => 'requires_correction']);
 
     expect($approved->isApproved())->toBe(true);
     expect($pending->isPending())->toBe(true);
@@ -15,7 +15,7 @@ test('can check approval status correctly', function () {
 });
 
 test('can format overtime hours as string', function () {
-    $attendance = new \App\Models\AttendanceLog(['overtime_hours' => 2.5]);
+    $attendance = new App\Models\AttendanceLog(['overtime_hours' => 2.5]);
 
     expect($attendance->formatted_overtime)->toBe('2h 30m');
 });
