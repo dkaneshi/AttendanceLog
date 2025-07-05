@@ -6,6 +6,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -28,6 +31,7 @@ final class User extends Authenticatable
         'suffix',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -120,5 +124,76 @@ final class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function attendanceLogs(): HasMany
+    {
+        return $this->hasMany(AttendanceLog::class);
+    }
+
+    public function managedAttendanceLogs(): HasMany
+    {
+        return $this->hasMany(AttendanceLog::class, 'manager_id');
+    }
+
+    public function approvedAttendanceLogs(): HasMany
+    {
+        return $this->hasMany(AttendanceLog::class, 'approved_by');
+    }
+
+    public function absenceBalance(): HasOne
+    {
+        return $this->hasOne(UserAbsenceBalance::class)
+            ->where('year', now()->year);
+    }
+
+    public function absenceBalances(): HasMany
+    {
+        return $this->hasMany(UserAbsenceBalance::class);
+    }
+
+    public function isEmployee(): bool
+    {
+        return $this->role === 'employee';
+    }
+
+    public function isManager(): bool
+    {
+        return $this->role === 'manager';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function canManageUsers(): bool
+    {
+        return $this->isManager() || $this->isAdmin();
+    }
+
+    public function canApproveAttendance(): bool
+    {
+        return $this->isManager() || $this->isAdmin();
+    }
+
+    public function getAbsenceBalanceForYear(int $year): UserAbsenceBalance
+    {
+        return UserAbsenceBalance::getOrCreateForUser($this->id, $year);
+    }
+
+    public function getCurrentAbsenceBalance(): UserAbsenceBalance
+    {
+        return $this->getAbsenceBalanceForYear(now()->year);
+    }
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(self::class, 'manager_id');
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'manager_id');
     }
 }
