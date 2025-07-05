@@ -187,6 +187,7 @@ The Attendance Log System is a web-based application designed to track employee 
 
 #### Users Table
 - id (Primary Key)
+- name (VARCHAR 255)
 - first_name (VARCHAR 255)
 - middle_name (VARCHAR 255)
 - last_name (VARCHAR 255)
