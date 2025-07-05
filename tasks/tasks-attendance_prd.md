@@ -25,7 +25,7 @@
 
 ## Tasks
 
-- [ ] 1.0 Set up database schema and models
+- [x] 1.0 Set up database schema and models
   - [x] 1.1 Create migration for attendance_logs table with all required fields
   - [x] 1.2 Create migration for user_absence_balances table
   - [x] 1.3 Update users table migration to add role field and name fields (first_name, middle_name, last_name, suffix)
