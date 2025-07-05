@@ -161,3 +161,6 @@ The project uses Livewire for interactive UI components. Livewire components are
 
 ### Flux UI
 The project uses Livewire Flux for UI components. Flux Pro is configured via a custom Composer repository.
+
+### Data Integrity
+The project shall use soft deletes for all database records and cascade on delete should not be used for foreign key relationships.
