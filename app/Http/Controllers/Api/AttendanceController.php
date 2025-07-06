@@ -12,7 +12,6 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 final class AttendanceController extends Controller
@@ -233,12 +232,15 @@ final class AttendanceController extends Controller
         // Calculate worked hours and overtime
         $workedHours = $this->overtimeCalculator->calculateWorkedHours($attendanceLog);
         $overtimeHours = $this->overtimeCalculator->calculateDailyOvertime($attendanceLog);
-        $totalHours = $workedHours;
 
         $attendanceLog->update([
             'shift_end_time' => $now->toDateTimeString(),
-            'total_hours' => $totalHours,
             'overtime_hours' => $overtimeHours,
+        ]);
+
+        // Recalculate total hours after updating shift_end_time
+        $attendanceLog->update([
+            'total_hours' => $attendanceLog->calculateTotalHours(),
         ]);
 
         return response()->json([
@@ -246,8 +248,8 @@ final class AttendanceController extends Controller
             'data' => [
                 'id' => $attendanceLog->id,
                 'shift_end_time' => $attendanceLog->shift_end_time,
-                'total_hours' => $totalHours,
-                'overtime_hours' => $overtimeHours,
+                'total_hours' => $attendanceLog->total_hours,
+                'overtime_hours' => $attendanceLog->overtime_hours,
                 'worked_hours' => $workedHours,
                 'lunch_duration_minutes' => $attendanceLog->lunch_duration,
                 'status' => 'completed',
@@ -286,7 +288,7 @@ final class AttendanceController extends Controller
         if (in_array($status, ['working', 'on_lunch'])) {
             $tempLog = clone $attendanceLog;
             if ($status === 'working' && ! $attendanceLog->shift_end_time) {
-                $tempLog->shift_end_time = Carbon::now();
+                $tempLog->shift_end_time = Carbon::now()->toDateTimeString();
             }
             $realTimeData = [
                 'current_worked_hours' => $this->overtimeCalculator->calculateWorkedHours($tempLog),
@@ -304,6 +306,8 @@ final class AttendanceController extends Controller
                 'lunch_start_time' => $attendanceLog->lunch_start_time,
                 'lunch_end_time' => $attendanceLog->lunch_end_time,
                 'shift_end_time' => $attendanceLog->shift_end_time,
+                'vacation_hours' => $attendanceLog->vacation_hours,
+                'sick_hours' => $attendanceLog->sick_hours,
                 'total_hours' => $attendanceLog->total_hours,
                 'overtime_hours' => $attendanceLog->overtime_hours,
                 'lunch_duration_minutes' => $attendanceLog->lunch_duration,
@@ -340,10 +344,10 @@ final class AttendanceController extends Controller
 
         $updateData = array_filter($request->only([
             'shift_start_time',
-            'lunch_start_time', 
+            'lunch_start_time',
             'lunch_end_time',
             'shift_end_time',
-        ]), fn($value) => $value !== null);
+        ]), fn ($value) => $value !== null);
 
         // Merge with existing data for validation
         $fullData = array_merge($attendanceLog->toArray(), $updateData);
@@ -356,9 +360,9 @@ final class AttendanceController extends Controller
         }
 
         // Recalculate totals if times are being updated
-        if (isset($updateData['shift_start_time']) || isset($updateData['shift_end_time']) || 
+        if (isset($updateData['shift_start_time']) || isset($updateData['shift_end_time']) ||
             isset($updateData['lunch_start_time']) || isset($updateData['lunch_end_time'])) {
-            
+
             $tempLog = $attendanceLog->replicate();
             foreach ($updateData as $key => $value) {
                 $tempLog->$key = $value;
@@ -412,11 +416,13 @@ final class AttendanceController extends Controller
         $history = $attendanceLogs->map(function ($log) {
             return [
                 'id' => $log->id,
-                'date' => $log->date,
+                'date' => $log->date->format('Y-m-d'),
                 'shift_start_time' => $log->shift_start_time,
                 'lunch_start_time' => $log->lunch_start_time,
                 'lunch_end_time' => $log->lunch_end_time,
                 'shift_end_time' => $log->shift_end_time,
+                'vacation_hours' => $log->vacation_hours,
+                'sick_hours' => $log->sick_hours,
                 'total_hours' => $log->total_hours,
                 'overtime_hours' => $log->overtime_hours,
                 'lunch_duration_minutes' => $log->lunch_duration,
@@ -434,6 +440,196 @@ final class AttendanceController extends Controller
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'count' => $history->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Log vacation hours for a specific date
+     */
+    public function logVacation(Request $request): JsonResponse
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'hours' => 'required|numeric|min:0.25|max:24',
+        ]);
+
+        $user = Auth::user();
+        $date = $request->input('date');
+        $hours = (float) $request->input('hours');
+
+        // Find existing entry or create new one
+        $attendanceLog = AttendanceLog::where('user_id', $user->id)
+            ->whereDate('date', $date)
+            ->first();
+
+        if ($attendanceLog) {
+            // Update existing entry
+            $attendanceLog->update([
+                'vacation_hours' => $hours,
+                'total_hours' => $attendanceLog->calculateTotalHours(),
+            ]);
+        } else {
+            // Create new entry for vacation only
+            $attendanceLog = AttendanceLog::create([
+                'user_id' => $user->id,
+                'manager_id' => $user->manager_id,
+                'date' => $date,
+                'vacation_hours' => $hours,
+                'sick_hours' => 0,
+                'total_hours' => $hours,
+                'overtime_hours' => 0,
+                'approval_status' => 'pending',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Vacation hours logged successfully',
+            'data' => [
+                'id' => $attendanceLog->id,
+                'date' => $attendanceLog->date,
+                'vacation_hours' => $attendanceLog->vacation_hours,
+                'total_hours' => $attendanceLog->total_hours,
+                'approval_status' => $attendanceLog->approval_status,
+            ],
+        ], 201);
+    }
+
+    /**
+     * Log sick hours for a specific date
+     */
+    public function logSick(Request $request): JsonResponse
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'hours' => 'required|numeric|min:0.25|max:24',
+        ]);
+
+        $user = Auth::user();
+        $date = $request->input('date');
+        $hours = (float) $request->input('hours');
+
+        // Find existing entry or create new one
+        $attendanceLog = AttendanceLog::where('user_id', $user->id)
+            ->whereDate('date', $date)
+            ->first();
+
+        if ($attendanceLog) {
+            // Update existing entry
+            $attendanceLog->update([
+                'sick_hours' => $hours,
+                'total_hours' => $attendanceLog->calculateTotalHours(),
+            ]);
+        } else {
+            // Create new entry for sick hours only
+            $attendanceLog = AttendanceLog::create([
+                'user_id' => $user->id,
+                'manager_id' => $user->manager_id,
+                'date' => $date,
+                'vacation_hours' => 0,
+                'sick_hours' => $hours,
+                'total_hours' => $hours,
+                'overtime_hours' => 0,
+                'approval_status' => 'pending',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Sick hours logged successfully',
+            'data' => [
+                'id' => $attendanceLog->id,
+                'date' => $attendanceLog->date,
+                'sick_hours' => $attendanceLog->sick_hours,
+                'total_hours' => $attendanceLog->total_hours,
+                'approval_status' => $attendanceLog->approval_status,
+            ],
+        ], 201);
+    }
+
+    /**
+     * Update vacation hours for an existing attendance entry
+     */
+    public function updateVacation(Request $request, AttendanceLog $attendanceLog): JsonResponse
+    {
+        $user = Auth::user();
+
+        // Check ownership
+        if ($attendanceLog->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized to modify this attendance entry',
+            ], 403);
+        }
+
+        // Check if entry can be edited
+        if (! $attendanceLog->canBeEdited()) {
+            return response()->json([
+                'message' => 'This attendance entry cannot be edited',
+            ], 422);
+        }
+
+        $request->validate([
+            'hours' => 'required|numeric|min:0|max:24',
+        ]);
+
+        $hours = (float) $request->input('hours');
+
+        $attendanceLog->update([
+            'vacation_hours' => $hours,
+            'total_hours' => $attendanceLog->calculateTotalHours(),
+        ]);
+
+        return response()->json([
+            'message' => 'Vacation hours updated successfully',
+            'data' => [
+                'id' => $attendanceLog->id,
+                'date' => $attendanceLog->date,
+                'vacation_hours' => $attendanceLog->vacation_hours,
+                'total_hours' => $attendanceLog->total_hours,
+                'approval_status' => $attendanceLog->approval_status,
+            ],
+        ]);
+    }
+
+    /**
+     * Update sick hours for an existing attendance entry
+     */
+    public function updateSick(Request $request, AttendanceLog $attendanceLog): JsonResponse
+    {
+        $user = Auth::user();
+
+        // Check ownership
+        if ($attendanceLog->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized to modify this attendance entry',
+            ], 403);
+        }
+
+        // Check if entry can be edited
+        if (! $attendanceLog->canBeEdited()) {
+            return response()->json([
+                'message' => 'This attendance entry cannot be edited',
+            ], 422);
+        }
+
+        $request->validate([
+            'hours' => 'required|numeric|min:0|max:24',
+        ]);
+
+        $hours = (float) $request->input('hours');
+
+        $attendanceLog->update([
+            'sick_hours' => $hours,
+            'total_hours' => $attendanceLog->calculateTotalHours(),
+        ]);
+
+        return response()->json([
+            'message' => 'Sick hours updated successfully',
+            'data' => [
+                'id' => $attendanceLog->id,
+                'date' => $attendanceLog->date,
+                'sick_hours' => $attendanceLog->sick_hours,
+                'total_hours' => $attendanceLog->total_hours,
+                'approval_status' => $attendanceLog->approval_status,
             ],
         ]);
     }

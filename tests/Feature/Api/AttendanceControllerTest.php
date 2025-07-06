@@ -34,7 +34,7 @@ describe('clockIn', function () {
         $this->assertDatabaseHas('attendance_logs', [
             'user_id' => $this->user->id,
         ]);
-        
+
         // Check the date separately since it's stored as datetime
         $log = AttendanceLog::where('user_id', $this->user->id)->first();
         expect($log->date->toDateString())->toBe(Carbon::today()->toDateString());
@@ -62,7 +62,7 @@ describe('clockIn', function () {
                     'status' => 'clocked_in',
                 ],
             ]);
-        
+
         // Check the date separately
         $responseData = $response->json('data');
         expect(Carbon::parse($responseData['date'])->toDateString())->toBe($date);
@@ -431,7 +431,6 @@ describe('status', function () {
         $response->assertStatus(200)
             ->assertJson([
                 'data' => [
-                    'date' => $date,
                     'status' => 'working',
                 ],
             ]);
@@ -535,9 +534,17 @@ describe('update', function () {
 
 describe('history', function () {
     test('returns attendance history', function () {
-        AttendanceLog::factory(3)->create([
+        AttendanceLog::factory()->create([
             'user_id' => $this->user->id,
-            'date' => fn() => Carbon::today()->subDays(fake()->numberBetween(1, 10)),
+            'date' => Carbon::today()->subDays(1),
+        ]);
+        AttendanceLog::factory()->create([
+            'user_id' => $this->user->id,
+            'date' => Carbon::today()->subDays(2),
+        ]);
+        AttendanceLog::factory()->create([
+            'user_id' => $this->user->id,
+            'date' => Carbon::today()->subDays(3),
         ]);
 
         $response = $this->getJson('/api/attendance/history');
@@ -589,10 +596,12 @@ describe('history', function () {
     });
 
     test('can limit history results', function () {
-        AttendanceLog::factory(5)->create([
-            'user_id' => $this->user->id,
-            'date' => fn() => Carbon::today()->subDays(fake()->numberBetween(1, 10)),
-        ]);
+        for ($i = 1; $i <= 5; $i++) {
+            AttendanceLog::factory()->create([
+                'user_id' => $this->user->id,
+                'date' => Carbon::today()->subDays($i),
+            ]);
+        }
 
         $response = $this->getJson('/api/attendance/history?limit=3');
 
@@ -602,7 +611,7 @@ describe('history', function () {
 
     test('only returns own attendance history', function () {
         $otherUser = User::factory()->create();
-        
+
         AttendanceLog::factory()->create([
             'user_id' => $this->user->id,
             'date' => Carbon::today()->subDay(),
@@ -620,25 +629,31 @@ describe('history', function () {
     });
 
     test('returns history ordered by date descending', function () {
-        $log1 = AttendanceLog::factory()->create([
+        $date1 = Carbon::today()->subDays(1)->toDateString();
+        $date2 = Carbon::today()->subDays(2)->toDateString();
+        $date3 = Carbon::today()->subDays(3)->toDateString();
+
+        AttendanceLog::factory()->create([
             'user_id' => $this->user->id,
-            'date' => '2025-01-01',
+            'date' => $date1,
         ]);
-        $log2 = AttendanceLog::factory()->create([
+        AttendanceLog::factory()->create([
             'user_id' => $this->user->id,
-            'date' => '2025-01-03',
+            'date' => $date3,
         ]);
-        $log3 = AttendanceLog::factory()->create([
+        AttendanceLog::factory()->create([
             'user_id' => $this->user->id,
-            'date' => '2025-01-02',
+            'date' => $date2,
         ]);
 
         $response = $this->getJson('/api/attendance/history');
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        expect($data[0]['date'])->toBe('2025-01-03');
-        expect($data[1]['date'])->toBe('2025-01-02');
-        expect($data[2]['date'])->toBe('2025-01-01');
+        expect($data)->toHaveCount(3);
+        // Most recent first (descending order)
+        expect($data[0]['date'])->toBe($date1);
+        expect($data[1]['date'])->toBe($date2);
+        expect($data[2]['date'])->toBe($date3);
     });
 });

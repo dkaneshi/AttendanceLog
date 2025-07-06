@@ -44,7 +44,7 @@
   - [x] 2.1 Create OvertimeCalculator service class with calculation logic
   - [x] 2.2 Implement attendance validation rules (time sequence, lunch duration, etc.)
   - [x] 2.3 Create attendance logging API endpoints (clock-in, lunch-start, lunch-end, clock-out)
-  - [ ] 2.4 Implement vacation/sick hours logging endpoints
+  - [x] 2.4 Implement vacation/sick hours logging endpoints
   - [ ] 2.5 Create balance checking and deduction logic
   - [ ] 2.6 Implement real-time overtime calculation
   - [ ] 2.7 Add prevention for duplicate daily entries
