@@ -14,6 +14,10 @@
 - `tests/Unit/Services/OvertimeCalculatorTest.php` - Unit tests for overtime calculator (completed)
 - `app/Services/AttendanceValidator.php` - Service class for attendance data validation (completed)
 - `tests/Unit/Services/AttendanceValidatorTest.php` - Unit tests for attendance validator (completed)
+- `app/Http/Controllers/Api/AttendanceController.php` - API controller for attendance logging endpoints (completed)
+- `tests/Feature/Api/AttendanceControllerTest.php` - Feature tests for attendance API endpoints (completed)
+- `routes/api.php` - API routes for attendance endpoints (completed)
+- `database/migrations/2025_07_06_085017_add_manager_id_to_users_table.php` - Migration to add manager relationship (completed)
 - `database/factories/AttendanceLogFactory.php` - Factory for creating test attendance log data (completed)
 - `database/migrations/2025_07_05_083420_create_attendance_logs_table.php` - Migration for attendance logs (completed)
 - `database/migrations/2025_07_05_083826_create_user_absence_balances_table.php` - Migration for absence balances (completed)
@@ -39,7 +43,7 @@
 - [ ] 2.0 Implement core attendance logging functionality
   - [x] 2.1 Create OvertimeCalculator service class with calculation logic
   - [x] 2.2 Implement attendance validation rules (time sequence, lunch duration, etc.)
-  - [ ] 2.3 Create attendance logging API endpoints (clock-in, lunch-start, lunch-end, clock-out)
+  - [x] 2.3 Create attendance logging API endpoints (clock-in, lunch-start, lunch-end, clock-out)
   - [ ] 2.4 Implement vacation/sick hours logging endpoints
   - [ ] 2.5 Create balance checking and deduction logic
   - [ ] 2.6 Implement real-time overtime calculation
