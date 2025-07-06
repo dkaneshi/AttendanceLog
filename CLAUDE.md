@@ -18,6 +18,10 @@ php artisan serve     # Laravel server
 npm run dev          # Vite with hot reload
 php artisan queue:listen  # Queue worker
 php artisan pail     # Log viewer
+
+# Should use 'php artisan' commands as much as possible when creating new files.
+# For a list of available commands use:
+php artisan list
 ```
 
 ### Testing & Code Quality
@@ -44,7 +48,7 @@ touch database/database.sqlite  # Create SQLite database file
 ## Architecture & Key Patterns
 
 ### Technology Stack
-- **Backend**: Laravel 12.x with PHP 8.2+
+- **Backend**: Laravel 12.x with PHP 8.3+
 - **Frontend**: Livewire 3.x, Livewire Volt (single-file components), Flux UI, Tailwind CSS v4
 - **Database**: SQLite (default), supports other databases via configuration
 - **Testing**: Pest PHP with parallel execution and coverage requirements
@@ -110,3 +114,13 @@ test('livewire component interaction', function () {
         ->assertSee('expected output');
 });
 ```
+
+## Documentation
+- **[Laravel](https://laravel.com/docs/12.x)** - you will also find documentation on Pint here.
+- **[Livewire](https://livewire.laravel.com/docs/quickstart)**
+- **[Alpine.js](https://alpinejs.dev/start-here)**
+- **[TailwindCSS](https://tailwindcss.com/docs/installation/using-vite)**
+- **[Pest PHP](https://pestphp.com/docs/installation)**
+- **[Larastan](https://github.com/larastan/larastan?tab=readme-ov-file)**
+- **[PHPStan](https://phpstan.org/user-guide/getting-started)**
+- **[Rector](https://getrector.com/documentation)**

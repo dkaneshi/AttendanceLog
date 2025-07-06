@@ -5,7 +5,7 @@ This document provides guidelines and instructions for developers working on the
 ## Build/Configuration Instructions
 
 ### Prerequisites
-- PHP 8.2 or higher
+- PHP 8.3 or higher
 - Composer
 - Node.js and npm
 
@@ -86,7 +86,7 @@ declare(strict_types=1);
 test('string can be reversed', function () {
     $original = 'Hello World';
     $reversed = strrev($original);
-    
+
     expect($reversed)->toBe('dlroW olleH');
 });
 ```
@@ -101,7 +101,7 @@ declare(strict_types=1);
 
 test('returns a successful response', function () {
     $response = $this->get('/');
-    
+
     $response->assertStatus(200);
 });
 ```
