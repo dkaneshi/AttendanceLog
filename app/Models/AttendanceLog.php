@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 final class AttendanceLog extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * @var array<string>
@@ -73,13 +74,13 @@ final class AttendanceLog extends Model
 
         $startTime = Carbon::parse($this->shift_start_time);
         $endTime = Carbon::parse($this->shift_end_time);
-        $totalMinutes = $endTime->diffInMinutes($startTime);
+        $totalMinutes = $startTime->diffInMinutes($endTime);
 
         // Subtract lunch break if both times are set
         if ($this->lunch_start_time && $this->lunch_end_time) {
             $lunchStart = Carbon::parse($this->lunch_start_time);
             $lunchEnd = Carbon::parse($this->lunch_end_time);
-            $lunchMinutes = $lunchEnd->diffInMinutes($lunchStart);
+            $lunchMinutes = $lunchStart->diffInMinutes($lunchEnd);
             $totalMinutes -= $lunchMinutes;
         }
 
@@ -142,7 +143,7 @@ final class AttendanceLog extends Model
         $lunchStart = Carbon::parse($this->lunch_start_time);
         $lunchEnd = Carbon::parse($this->lunch_end_time);
 
-        return $lunchEnd->diffInMinutes($lunchStart);
+        return (int) $lunchStart->diffInMinutes($lunchEnd);
     }
 
     public function getFormattedOvertimeAttribute(): string

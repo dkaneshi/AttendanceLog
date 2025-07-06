@@ -10,8 +10,11 @@
 - `tests/Feature/Livewire/Attendance/TimeEntryTest.php` - Feature tests for time entry
 - `app/Livewire/Manager/ApprovalQueue.php` - Manager approval interface component
 - `tests/Feature/Livewire/Manager/ApprovalQueueTest.php` - Tests for approval workflow
-- `app/Services/OvertimeCalculator.php` - Service class for overtime calculations
-- `tests/Unit/Services/OvertimeCalculatorTest.php` - Unit tests for overtime calculator
+- `app/Services/OvertimeCalculator.php` - Service class for overtime calculations (completed)
+- `tests/Unit/Services/OvertimeCalculatorTest.php` - Unit tests for overtime calculator (completed)
+- `app/Services/AttendanceValidator.php` - Service class for attendance data validation (completed)
+- `tests/Unit/Services/AttendanceValidatorTest.php` - Unit tests for attendance validator (completed)
+- `database/factories/AttendanceLogFactory.php` - Factory for creating test attendance log data (completed)
 - `database/migrations/2025_07_05_083420_create_attendance_logs_table.php` - Migration for attendance logs (completed)
 - `database/migrations/2025_07_05_083826_create_user_absence_balances_table.php` - Migration for absence balances (completed)
 - `database/migrations/2025_07_05_083951_add_role_to_users_table.php` - Migration to add role field to users table (completed)
@@ -34,8 +37,8 @@
   - [x] 1.6 Update User model to include role management and relationships
   - [x] 1.7 Create database seeders for testing data
 - [ ] 2.0 Implement core attendance logging functionality
-  - [ ] 2.1 Create OvertimeCalculator service class with calculation logic
-  - [ ] 2.2 Implement attendance validation rules (time sequence, lunch duration, etc.)
+  - [x] 2.1 Create OvertimeCalculator service class with calculation logic
+  - [x] 2.2 Implement attendance validation rules (time sequence, lunch duration, etc.)
   - [ ] 2.3 Create attendance logging API endpoints (clock-in, lunch-start, lunch-end, clock-out)
   - [ ] 2.4 Implement vacation/sick hours logging endpoints
   - [ ] 2.5 Create balance checking and deduction logic
